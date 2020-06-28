@@ -42,7 +42,7 @@ class ModT:
     def write(self, endpoint, message):
         self.dev.write(endpoint, message)
 
-    def write_gcode(self, gcode, print_status=False, print_blocks=False, encoding='utf8'):
+    def write_gcode(self, gcode, print_progress=False, print_status=False, print_blocks=False, encoding='utf8'):
         if not isinstance(gcode, bytes):
             gcode = bytes(gcode, encoding)
         gcode_len = len(gcode)
@@ -76,7 +76,8 @@ class ModT:
 
             end = min(gcode_len, ptr+blocksize)
             block = gcode[ptr:end]
-            print(f'# block: {ptr}-{end}, block-size: {len(block)}')
+            if print_progress:
+                print(f'# block: {ptr}-{end} of {gcode_len}, block-size: {len(block)}')
             if print_blocks:
                 print(block)
 
@@ -124,6 +125,7 @@ if __name__ == '__main__':
     parser_gcode = subparsers.add_parser('send_gcode', help='Send the contents of a gcode-file to the printer')
     parser_gcode.add_argument('file', help='Path to the gcode-file. Must be utf8 encoded.')
     parser_gcode.add_argument('--print-blocks', help='Print submitted blocks to screen', action='store_true')
+    parser_gcode.add_argument('--print-progress', help='Print the current progress for every submitted block', action='store_true')
     parser_gcode.add_argument('--print-status', help='Print the printers status every 20 blocks', action='store_true')
 
     subparsers.add_parser('status', help='Retrieve the printers status. This is the default action.')
@@ -162,7 +164,12 @@ if __name__ == '__main__':
         printer.write_gcode(GCODES.CLEAR_NOZZLE)
 
     elif args.subcmd == 'send_gcode':
-        printer.write_gcode_file(args.file, args.print_status, args.print_blocks)
+        printer.write_gcode_file(
+            args.file,
+            print_progress = args.print_progress,
+            print_status = args.print_status,
+            print_blocks = args.print_blocks
+        )
 
     elif args.subcmd == 'firmware_update':
         #This script *SHOULD* eventually be the all-encompassing firmware update
