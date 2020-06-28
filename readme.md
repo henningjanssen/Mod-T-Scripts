@@ -8,10 +8,9 @@ This work falls under the MIT license. See the LICENSE file for more information
 I must also credit /u/modtdev on reddit for the work on getting the gcode sent to the Mod-T.
 
 # Depdencies
-1. `curl` (only for maintenance)
-2. `dfu-util` (only for maintenance)
-3. `python3`
-4. `python3-pyusb` (`python3 -m pip install pyusb`)
+1. `dfu-util` (only for maintenance)
+2. `python3`
+3. `python3-pyusb` (`python3 -m pip install pyusb`)
 
 
 # Usage
