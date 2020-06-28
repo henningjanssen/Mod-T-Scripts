@@ -127,7 +127,7 @@ if __name__ == '__main__':
     parser_gcode.add_argument('--print-blocks', help='Print submitted blocks to screen', action='store_true')
     parser_gcode.add_argument('--print-status', help='Print the printers status every 20 blocks', action='store_true')
 
-    subparsers.add_parser('status', help='Retrieve the printers status')
+    subparsers.add_parser('status', help='Retrieve the printers status. This is the default action.')
     subparsers.add_parser('unload_filament', help='Unload filament')
     subparsers.add_parser('wifi_status', help='Get wifi client status. Seems to be equal to status.')
 
