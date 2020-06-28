@@ -40,7 +40,6 @@ class ModT:
         self.dev.write(2, bytearray.fromhex('246c0093ff'))
 
     def write(self, endpoint, message):
-        print(endpoint, message)
         self.dev.write(endpoint, message)
 
     def write_gcode(self, gcode, print_status=False, print_blocks=False, encoding='utf8'):
