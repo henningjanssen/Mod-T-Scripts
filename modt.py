@@ -6,6 +6,16 @@ import usb.util
 import time
 from zlib import adler32
 
+class GCODES:
+    CLEAR_NOZZLE = '''
+        M82
+        M109 S230.0 ;set temp and wait
+        G0 Z100 F300 ; move to Z 100 when @ temp
+        G1 E10.0000 F9000.00000 ; extrude some filament
+        G0 Z50 F100 ; move down slowly after extruding
+        ; https://github.com/ajfoul/MOD-t/blob/master/clearnozzle.gcode
+    '''
+
 class ModT:
     class PAYLOADS:
         BIO_GET_VERSION = (2, '{"transport":{"attrs":["request","twoway"],"id":3},"data":{"command":{"idx":0,"name":"bio_get_version"}}};')
@@ -30,6 +40,7 @@ class ModT:
         self.dev.write(2, bytearray.fromhex('246c0093ff'))
 
     def write(self, endpoint, message):
+        print(endpoint, message)
         self.dev.write(endpoint, message)
 
     def write_gcode(self, gcode, print_status=False, print_blocks=False, encoding='utf8'):
@@ -103,6 +114,7 @@ if __name__ == '__main__':
 
     subparsers = parser.add_subparsers(title='available sub-commands', dest='subcmd')
     subparsers.add_parser('bio_version', help='Get bio version. Seems to be equal to status.')
+    subparsers.add_parser('clear_nozzle', help='Execute gcode to clear the nozzle')
     subparsers.add_parser('enter_dfu', help='Enter dfu mode')
 
     parser_fwupdate = subparsers.add_parser('firmware_update', help='Update firmware. Not implemented. Check https://github.com/tripflex/MOD-t for firmware-versions.')
@@ -127,7 +139,7 @@ if __name__ == '__main__':
         'load_filament': (ModT.PAYLOADS.LOAD_INITIATE, None),
         #'status': ModT.PAYLOADS.STATUS,
         'unload_filament': (ModT.PAYLOADS.UNLOAD_INITIATE, None),
-        'wifi_stats': (ModT.PAYLOADS.WIFI_CLIENT_GET_STATUS, 0x81)
+        'wifi_status': (ModT.PAYLOADS.WIFI_CLIENT_GET_STATUS, 0x81)
     }
 
     try:
@@ -138,11 +150,21 @@ if __name__ == '__main__':
 
     if args.subcmd in cmd_map:
         wargs, rendpoint = cmd_map[args.subcmd]
+        print(f'endpoint: {wargs[0]},', f'request: {wargs[1]}')
         printer.write(*wargs)
         if rendpoint is not None:
             print(printer.read(rendpoint))
+
+    elif args.subcmd == 'clear_nozzle':
+        print('Clearing nozzle.')
+        print('Please press the start button when you see the STATE_JOB_QUEUED message')
+        print('using gcode:')
+        print(GCODES.CLEAR_NOZZLE)
+        printer.write_gcode(GCODES.CLEAR_NOZZLE)
+
     elif args.subcmd == 'send_gcode':
         printer.write_gcode_file(args.file, args.print_status, args.print_blocks)
+
     elif args.subcmd == 'firmware_update':
         #This script *SHOULD* eventually be the all-encompassing firmware update
     	#It should call the check FW script, place the Mod-T into DFU mode and flash the firmware
