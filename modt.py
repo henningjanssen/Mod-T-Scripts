@@ -77,7 +77,7 @@ class ModT:
             end = min(gcode_len, ptr+blocksize)
             block = gcode[ptr:end]
             if print_progress:
-                print(f'# block: {ptr}-{end} of {gcode_len}, block-size: {len(block)}')
+                print(f'# progress: {round(100*ptr/gcode_len, 3)}%, block: {ptr}-{end} of {gcode_len}, block-size: {len(block)}')
             if print_blocks:
                 print(block)
 
